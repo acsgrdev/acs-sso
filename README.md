@@ -59,11 +59,25 @@ Add this snippet to the **very top** of your `<head>` section. It will hide the 
 </script>
 ```
 
-### 2. (Optional) Display User Name
-If you want to show the logged-in user's name on your page, simply add an element with the ID `sso-user-name`:
+### 2. (Optional) Display User Name & Role
+If you want to show the logged-in user's name and role on your page, add elements with the IDs `sso-user-name` and `sso-user-role`:
 
 ```html
-<p>Logged in as: <strong id="sso-user-name">...</strong></p>
+<p>Logged in as: <strong id="sso-user-name">...</strong> (<span id="sso-user-role">...</span>)</p>
+```
+
+You can update the protection script's success block (line 37-39) to also populate the role:
+```javascript
+            if (data && data.success) {
+                // Success: Show user name and role if elements exist
+                const nameEl = document.getElementById('sso-user-name');
+                if (nameEl) nameEl.textContent = data.fullName;
+                
+                const roleEl = document.getElementById('sso-user-role');
+                if (roleEl) {
+                    // Capitalize role for display
+                    roleEl.textContent = data.role.charAt(0).toUpperCase() + data.role.slice(1);
+                }
 ```
 
 ---
