@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 2</title>
+    <!-- ACS SSO Protection -->
+    <script>
+    (function() {
+        const SSO_PORTAL_URL = "https://api.acs.gr/sso/";
+        const API_ENDPOINT = "https://api.acs.gr/sso/api/guardian-profile.php";
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('sso_token');
+        if (tokenFromUrl) sessionStorage.setItem('sso_token', tokenFromUrl);
+    
+        const savedToken = sessionStorage.getItem('sso_token');
+        const LOGIN_URL = SSO_PORTAL_URL + "?return_to=" + encodeURIComponent(window.location.origin + window.location.pathname);
+    
+        document.documentElement.style.display = 'none'; // Hide page
+    
+        async function checkAuthentication() {
+            try {
+                const fetchUrl = new URL(API_ENDPOINT);
+                if (savedToken) fetchUrl.searchParams.set('sso_token', savedToken);
+    
+                const response = await fetch(fetchUrl.toString(), { method: 'GET' });
+                const data = await response.json();
+    
+                if (data && data.success) {
+                    // Success: Show user name and role if elements exist
+                    const nameEl = document.getElementById('sso-user-name');
+                    if (nameEl) nameEl.textContent = data.fullName;
+
+                    const roleEl = document.getElementById('sso-user-role');
+                    if (roleEl) {
+                        roleEl.textContent = data.role.charAt(0).toUpperCase() + data.role.slice(1);
+                    }
+                    
+                    document.documentElement.style.display = 'block'; // Show page
+                    
+                    // Clean URL (removes ?sso_token=... from address bar)
+                    if (tokenFromUrl) {
+                        urlParams.delete('sso_token');
+                        urlParams.delete('ps_auth');
+                        const cleanUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }
+                } else {
+                    window.location.href = LOGIN_URL;
+                }
+            } catch (err) {
+                window.location.href = LOGIN_URL;
+            }
+        }
+        checkAuthentication();
+    })();
+    </script>
+</head>
+<body style="font-family: sans-serif; padding: 40px; background-color: #f1f5f9; color: #1e293b;">
+    <h1>Page 2</h1>
+    <p style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: inline-block;">
+        Logged in as: <strong id="sso-user-name">...</strong> (<span id="sso-user-role" style="font-style: italic;">...</span>)
+    </p>
+    <br><br>
+    <a href="page1.html" style="color: #004b8d; text-decoration: none; font-weight: 600;">&larr; Back to Page 1</a>
+</body>
+</html>
