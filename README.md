@@ -34,9 +34,14 @@ Add this snippet to the **very top** of your `<head>` section. It will hide the 
             const data = await response.json();
 
             if (data && data.success) {
-                // Success: Show user name if element exists
+                // Success: Show user name and role if elements exist
                 const nameEl = document.getElementById('sso-user-name');
                 if (nameEl) nameEl.textContent = data.fullName;
+
+                const roleEl = document.getElementById('sso-user-role');
+                if (roleEl) {
+                    roleEl.textContent = data.role.charAt(0).toUpperCase() + data.role.slice(1);
+                }
                 
                 document.documentElement.style.display = 'block'; // Show page
                 
